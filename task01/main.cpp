@@ -65,7 +65,13 @@ void draw_polygon(
         float p1x = polygon_xy[i1_vtx * 2 + 0] - x;
         float p1y = polygon_xy[i1_vtx * 2 + 1] - y;
         // write a few lines of code to compute winding number (hint: use atan2)
+        float p0_len = sqrtf(p0x * p0x + p0y * p0y);
+        float p1_len = sqrtf(p1x * p1x + p1y * p1y);
+        float sin_theta = -(p0x * p1y - p0y * p1x) / (p0_len * p1_len);
+        float cos_theta = (p0x * p1x + p0y * p1y) / (p0_len * p1_len);
+        winding_number += atan2f(sin_theta, cos_theta) / (2*M_PI);
       }
+      
       const int int_winding_number = int(std::round(winding_number));
       if (int_winding_number == 1 ) { // if (x,y) is inside the polygon
         img_data[ih*width + iw] = brightness;
@@ -91,6 +97,21 @@ void dda_line(
   auto dx = x1 - x0;
   auto dy = y1 - y0;
   // write some code below to paint pixel on the line with color `brightness`
+  if (abs(dx) > abs(dy)) {
+    float slope = dy / dx;
+    int sign = (x1 > x0) ? 1 : -1;
+    for (int ix = 0; ix <= int(abs(x1-x0)); ++ix) {
+      int iy = int(y0 + sign * slope * ix);
+      img_data[iy * width +  (sign * ix + int(x0))] = brightness;
+    }
+  } else {
+    float slope = dx / dy;
+    int sign = (y1 > y0) ? 1 : -1;
+    for (int iy = 0; iy <= int(abs(y1-y0)); ++iy) {
+      int ix = int(x0 + sign * slope * iy );
+      img_data[(sign * iy + int(y0)) * width +  ix] = brightness;
+    }
+  }
 }
 
 int main() {
