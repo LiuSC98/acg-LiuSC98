@@ -65,8 +65,45 @@ int number_of_intersection_ray_against_quadratic_bezier(
     const Eigen::Vector2f &pc,
     const Eigen::Vector2f &pe) {
   // comment out below to do the assignment
-  return number_of_intersection_ray_against_edge(org, dir, ps, pe);
+  // return number_of_intersection_ray_against_edge(org, dir, ps, pe);
   // write some code below to find the intersection between ray and the quadratic
+    // quadratic bézier curve: (1-t)*((1-t)*ps+t*pc) + t*((1-t)*pc+t*pe) 
+  //                        = (1-t)^2*ps + 2*t*(1-t)*pc + t^2*pe 
+  //                        = (ps+pe-2*pc)*t^2 + 2*(pc-ps)*t + ps
+    auto a = ps + pe - 2 * pc;
+    auto b = 2 * (pc - ps);
+    auto c = ps - org;
+    Eigen::Vector2f w; // vector w is perpendicular to dir
+    w.x() = dir.y();
+    w.y() = -dir.x();
+    float A = a.dot(w);
+    float B = b.dot(w);
+    float C = c.dot(w);
+    float delta = B * B - 4 * A * C;
+    int num_of_intersection = 0;
+    if (delta == 0){
+        float t = -B / (2 * A);
+        if (t > 0 && t < 1){
+          Eigen::Vector2f s_dir = (t - 1) * (t - 1) * ps + 2 * (1 - t) * t * pc + t * t * pe - org;
+          float s = dir.dot(s_dir);
+          if (s > 0) num_of_intersection++;
+        }
+    }
+    else if (delta > 0){
+        float t1 = (-B + sqrt(delta)) / (2 * A);
+        float t2 = (-B - sqrt(delta)) / (2 * A);
+        if (t1 > 0 && t1 < 1){
+          Eigen::Vector2f s_dir = (t1 - 1) * (t1 - 1) * ps + 2 * (1 - t1) * t1 * pc + t1 * t1 * pe - org;
+          float s = dir.dot(s_dir);
+          if (s > 0) num_of_intersection++;
+        }
+        if (t2 > 0 && t2 < 1){
+          Eigen::Vector2f s_dir = (t2 - 1) * (t2 - 1) * ps + 2 * (1 - t2) * t2 * pc + t2 * t2 * pe - org;
+          float s = dir.dot(s_dir);
+          if (s > 0) num_of_intersection++;
+        }
+    }
+    return num_of_intersection;
 }
 
 int main() {
