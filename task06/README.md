@@ -40,8 +40,7 @@ The program output the computation time. Fill the table below to compare the tim
 
 | brute force | BVH    |
 | ----------- | ------ |
-| ??? ms      | ??? ms |
-
+| 2248 ms     | 19 ms  |
 
 
 
@@ -63,7 +62,7 @@ The computation of ambient occlusion is a bit noisy (i.e., the variance is high)
 
 | Uniform sample              | Cosine weighted sample        |
 | --------------------------- | ----------------------------- |
-| ![problem2](ao_uniform.png) | ![problem3](ao_cosweight.png) |
+| ![problem3](ao_uniform.png) | ![problem4](ao_cosweight.png) |
 
 
 
