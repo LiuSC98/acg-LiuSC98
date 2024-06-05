@@ -367,7 +367,13 @@ int main() {
         if (hit1_object == -1){ continue; }
         float hit1_rad = spheres[hit1_object].emission;
         // compute the contribution for this pixel
-        float rad = 0.f; // replace this with some code
+        
+        auto dir_to_light = (hit1_pos - hit0_pos).normalized();
+        float distance2 = (hit1_pos - hit0_pos).squaredNorm();
+        float cos_theta = abs(hit0_normal.dot(dir_to_light));//std::max(hit0_normal.dot(dir_to_light),0.f);
+        float cos_phi = abs(-hit1_normal.dot(dir_to_light));//std::max(-hit1_normal.dot(dir_to_light),0.f);
+        float rad = cos_theta * cos_phi * hit0_brdf * hit1_rad / distance2 / hit0_pdf/ nsample;
+        
         img_light[ih * img_width + iw] += rad;
       }
       // -----------------
@@ -386,7 +392,10 @@ int main() {
         if (hit1_object == -1){ continue; }
         float hit1_rad = spheres[hit1_object].emission;
         // compute the contribution for this pixel
-        float rad = 0.f; // replace this with some code
+        auto dir_to_light = (hit1_pos - hit0_pos).normalized();
+        float cos_theta = std::max(hit0_normal.dot(dir_to_light),0.f);
+        float rad = cos_theta * hit0_brdf * hit1_rad  / hit0_pdf / nsample;
+        
         img_brdf[ih * img_width + iw] += rad;
       }
       // -----------------
@@ -404,7 +413,11 @@ int main() {
         float hit1_rad = spheres[hit1_object].emission;
         float hit0_pdf_brdf_sample = spheres[hit0_object].pdf(hit0_normal, cam_ray_dir, hit0_refl);
         float hit0_pdf_light_sample = pdf_light_sample(hit0_normal, hit0_pos, cam_ray_dir, hit0_refl, hit0_object);
-        float rad = 0.f; // write some code
+        
+        auto dir_to_light = (hit1_pos - hit0_pos).normalized();
+        float cos_theta = std::max(hit0_normal.dot(dir_to_light),0.f);
+        float rad = cos_theta * hit0_brdf * hit1_rad / (hit0_pdf_brdf_sample + hit0_pdf_light_sample)/num_half_sample;
+        
         img_mis[ih * img_width + iw] += rad;
       }
       for (int isample = 0; isample < nsample / 2; ++isample) {
@@ -416,7 +429,13 @@ int main() {
         float hit1_rad = spheres[hit1_object].emission;
         float hit0_pdf_light_sample = pdf_light_sample(hit0_normal, hit0_pos, cam_ray_dir, hit0_refl, hit0_object);
         float hit0_pdf_brdf_sample = spheres[hit0_object].pdf(hit0_normal, cam_ray_dir, hit0_refl);
-        float rad = 0.f; // write some code
+        
+        auto dir_to_light = (hit1_pos - hit0_pos).normalized();
+        float distance2 = (hit1_pos - hit0_pos).squaredNorm();
+        float cos_theta = std::max(hit0_normal.dot(dir_to_light),0.f);
+        float cos_phi = std::max(hit1_normal.dot(-dir_to_light),0.f);
+        float rad = cos_theta * cos_phi * hit0_brdf * hit1_rad / distance2 /(hit0_pdf_light_sample + hit0_pdf_brdf_sample)/num_half_sample;
+        
         img_mis[ih * img_width + iw] += rad;
       }
     }
